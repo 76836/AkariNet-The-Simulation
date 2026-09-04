@@ -1,10 +1,13 @@
 /**
+ * SESSION-LOGGER-E5R2N
  * Records the session in the agreed brutalist ChatML format.
- * Sparse SSUs, strict alternation, no system prompt.
+ * Sparse SSUs, strict role alternation, no system prompt.
  */
+
 export class SessionLogger {
   constructor() {
-    this.turns = []; // { role: 'user'|'assistant', content: string }
+    // SESSION-LOGGER-E5R2N-INIT
+    this.turns = [];
     this._lastRole = null;
   }
 
@@ -13,8 +16,8 @@ export class SessionLogger {
     this._lastRole = null;
   }
 
+  /** SESSION-LOGGER-E5R2N-PUSH */
   _push(role, content) {
-    // Enforce alternation by merging into previous turn of same role if needed
     if (this._lastRole === role && this.turns.length) {
       this.turns[this.turns.length - 1].content += '\n' + content;
     } else {
@@ -23,18 +26,16 @@ export class SessionLogger {
     }
   }
 
-  /** Full or sparse state object → <state> tag */
+  /** SESSION-LOGGER-E5R2N-STATE */
   pushState(stateObj) {
     let body;
     if (stateObj.mood && stateObj.body) {
-      // full-ish
       body = [
-        `mood:happy:${stateObj.mood.happy?.toFixed?.(2) ?? stateObj.mood.happy} tired:${stateObj.mood.tired?.toFixed?.(2) ?? stateObj.mood.tired} dirt:${stateObj.mood.dirt?.toFixed?.(2) ?? stateObj.mood.dirt ?? 0}`,
+        `mood:happy:${Number(stateObj.mood.happy).toFixed(2)} tired:${Number(stateObj.mood.tired).toFixed(2)} dirt:${Number(stateObj.mood.dirt ?? 0).toFixed(2)}`,
         `body:${stateObj.body} task:${stateObj.task} autonomy:${stateObj.autonomy ?? 'none'}`,
         `hands:R=${stateObj.hands?.R ?? 'null'} L=${stateObj.hands?.L ?? 'null'} look:${stateObj.look ?? 'none'}`
       ].join('\n');
     } else {
-      // sparse
       const parts = [];
       if (stateObj.mood) parts.push(`mood:happy:${stateObj.mood.happy} tired:${stateObj.mood.tired}`);
       if (stateObj.hands) parts.push(`hands:R=${stateObj.hands.R ?? 'null'} L=${stateObj.hands.L ?? 'null'}`);
@@ -58,6 +59,7 @@ export class SessionLogger {
     this._push('assistant', text);
   }
 
+  /** SESSION-LOGGER-E5R2N-EXPORT */
   toChatML() {
     return this.turns.map(t => {
       return `<|im_start|>${t.role}\n${t.content}\n<|im_end|>`;

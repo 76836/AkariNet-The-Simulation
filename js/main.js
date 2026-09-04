@@ -1,71 +1,55 @@
+/**
+ * MAIN-ENTRY-D1Q6T
+ * Entry point for The Simulation (Stage 1).
+ * Wires world, character (VRM Akari), input, camera, and ChatML session logger.
+ */
+
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { Character } from './character.js';
 import { SessionLogger } from './session-logger.js';
 import { InputManager } from './input.js';
+import { createWorld } from './world.js';
 
+// MAIN-ENTRY-D1Q6T-DOM
 const container = document.getElementById('canvas-container');
 const statePanel = document.getElementById('state-panel');
 const statusEl = document.getElementById('status');
 
-// Renderer
-const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+// MAIN-ENTRY-D1Q6T-RENDERER
+const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.shadowMap.enabled = true;
 container.appendChild(renderer.domElement);
 
-// Scene
+// MAIN-ENTRY-D1Q6T-SCENE
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x87ceeb);
-scene.fog = new THREE.Fog(0x87ceeb, 20, 80);
+const world = createWorld(scene);
 
-// Lights
-const hemi = new THREE.HemisphereLight(0xffffff, 0x444444, 1.2);
-scene.add(hemi);
-const dir = new THREE.DirectionalLight(0xffffff, 1.5);
-dir.position.set(5, 10, 7);
-dir.castShadow = true;
-scene.add(dir);
+// MAIN-ENTRY-D1Q6T-CAMERA
+const camera = new THREE.PerspectiveCamera(48, window.innerWidth / window.innerHeight, 0.1, 120);
+const cameraTarget = new THREE.Vector3();
+const cameraOffset = new THREE.Vector3(0, 1.55, 3.8);
 
-// Ground
-const groundGeo = new THREE.PlaneGeometry(100, 100);
-const groundMat = new THREE.MeshStandardMaterial({ color: 0x3a7d44 });
-const ground = new THREE.Mesh(groundGeo, groundMat);
-ground.rotation.x = -Math.PI / 2;
-ground.receiveShadow = true;
-scene.add(ground);
-
-// Simple marker for "cookie" interactable
-const cookieGeo = new THREE.SphereGeometry(0.15, 16, 16);
-const cookieMat = new THREE.MeshStandardMaterial({ color: 0xc4a35a });
-const cookie = new THREE.Mesh(cookieGeo, cookieMat);
-cookie.position.set(2, 0.15, 1);
-scene.add(cookie);
-
-// Camera (third-person)
-const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 100);
-let cameraTarget = new THREE.Vector3();
-let cameraOffset = new THREE.Vector3(0, 1.6, 3.5);
-
-// Character + systems
+// MAIN-ENTRY-D1Q6T-SYSTEMS
 const character = new Character(scene);
 const logger = new SessionLogger();
 const input = new InputManager();
 
-// Initial full state
+// Initial full state (Stage 0 style)
 logger.pushState(character.getFullState());
 logger.pushAssistant('*stands quietly, looking around*');
 
-// UI
+// MAIN-ENTRY-D1Q6T-UI
 document.getElementById('btn-export').onclick = () => {
   const chatml = logger.toChatML();
   const blob = new Blob([chatml], { type: 'text/plain' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = `session-${Date.now()}.chatml`;
+  a.download = `simulation-session-${Date.now()}.chatml`;
   a.click();
+  statusEl.textContent = 'ChatML exported';
 };
 
 document.getElementById('btn-reset').onclick = () => {
@@ -75,14 +59,14 @@ document.getElementById('btn-reset').onclick = () => {
   statusEl.textContent = 'Session reset';
 };
 
-// Resize
+// MAIN-ENTRY-D1Q6T-RESIZE
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
-// Main loop
+// MAIN-ENTRY-D1Q6T-LOOP
 const clock = new THREE.Clock();
 function animate() {
   requestAnimationFrame(animate);
@@ -98,17 +82,24 @@ function animate() {
     logger.pushState(delta);
   }
 
-  // Simple third-person camera follow
-  cameraTarget.copy(character.position).add(new THREE.Vector3(0, 1.2, 0));
-  const desired = cameraTarget.clone().add(cameraOffset.clone().applyAxisAngle(new THREE.Vector3(0,1,0), character.yaw));
-  camera.position.lerp(desired, 1 - Math.exp(-4 * dt));
+  // Third-person camera
+  cameraTarget.copy(character.position).add(new THREE.Vector3(0, 1.25, 0));
+  const desired = cameraTarget.clone().add(
+    cameraOffset.clone().applyAxisAngle(new THREE.Vector3(0, 1, 0), character.yaw)
+  );
+  camera.position.lerp(desired, 1 - Math.exp(-3.8 * dt));
   camera.lookAt(cameraTarget);
 
-  // Update state panel
   statePanel.textContent = character.debugString();
-
   renderer.render(scene, camera);
 }
 animate();
 
-statusEl.textContent = 'Stage 1 ready – move with WASD / touch';
+statusEl.textContent = 'Stage 1 – Akari VRM loading…';
+// Update status once VRM is ready (polled lightly)
+const readyCheck = setInterval(() => {
+  if (character.ready) {
+    statusEl.textContent = 'Stage 1 ready – WASD / touch to move, E to interact';
+    clearInterval(readyCheck);
+  }
+}, 400);

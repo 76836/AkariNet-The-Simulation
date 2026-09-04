@@ -1,30 +1,34 @@
-# AkariNet - The Simulation
+# AkariNet – The Simulation
 
-Stage 1: Port of Viva-style classical character AI behaviors to pure HTML + JavaScript for high-quality data generation.
+Stage 1 port of OpenViva-style classical character AI + Akari VRM into a playable HTML/JS environment for ChatML data generation.
 
-**Goal**: Generate ChatML trajectories of humanoid character control (state, actions, voice, events) for training smaller models.
+**Live:** https://76836.github.io/AkariNet-The-Simulation/
 
-## Features (Day 0)
-- Third-person playable character (Genshin-like feel)
-- Keyboard + mouse + touch controls
+## Current Features
+- Third-person Genshin-like controls (keyboard + mouse + touch)
+- Akari loaded as real VRM (`Akarilite.vrm` from AkariNet)
+- Modular file structure with searchable alphanumeric IDs in comments
 - Sparse Single Status Updates (SSU)
-- Session recording → ChatML export
-- VRM character support (code adapted from AkariNet)
-- No VR (desktop/mobile web only for now)
+- Full session → ChatML export (brutalist format, no system prompt)
+- Simple outdoor world (ground, path, trees, interactable cookie)
 
-## Live
-Once GitHub Pages is enabled: https://76836.github.io/AkariNet-The-Simulation/
+## File Map (IDs)
+- `js/vrm-loader.js` — **VRM-LOADER-A7F3K**
+- `js/character.js` — **CHARACTER-CORE-B2E9M**
+- `js/world.js` — **WORLD-BUILDER-C4P8R**
+- `js/main.js` — **MAIN-ENTRY-D1Q6T**
+- `js/session-logger.js` — **SESSION-LOGGER-E5R2N**
+- `js/input.js` — **INPUT-MANAGER-F8K3W**
 
 ## Controls
-- **Desktop**: WASD / Arrow keys move, mouse look, Space jump, E interact
-- **Mobile**: Virtual joystick + look pad + action buttons
-- **Export**: Button to download current session as `.chatml` / `.jsonl`
+- **Desktop**: WASD / Arrows move, mouse-drag look, E interact, Space jump
+- **Phone**: Left joystick move, right joystick look, E / Jump buttons
+- Export ChatML button in top bar
 
-## Architecture (Stage 1)
-- Classical engine in JS (mood, body state, active task, autonomy, hands, vision interests)
-- Sparse state deltas only
-- Full ChatML logger from the first frame
-- Later stages will add LLM control loop
+## Next (still Stage 1)
+- Port more OpenViva body states, animation sets, autonomy, vision interests
+- Basic locomotion animations on the VRM
+- Richer world + more interactables
+- CLI testing harness
 
-## Repo Rules
-Only this repository is modified. Code is adapted/copied from OpenViva (MIT) and AkariNet where useful.
+Only this repository is modified.
