@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>The Simulation – Stage 1</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; overflow: hidden; background: #111; color: #eee; font-family: system-ui, sans-serif; }
+    #canvas-container { position: absolute; inset: 0; }
+    canvas { display: block; width: 100%; height: 100%; }
+    #ui {
+      position: absolute; top: 0; left: 0; right: 0; padding: 8px;
+      display: flex; gap: 8px; flex-wrap: wrap; pointer-events: none;
+      z-index: 10;
+    }
+    #ui > * { pointer-events: auto; }
+    button, .panel {
+      background: rgba(0,0,0,0.65); border: 1px solid #444; color: #eee;
+      padding: 8px 12px; border-radius: 8px; font-size: 14px;
+    }
+    button:active { background: #333; }
+    #state-panel {
+      position: absolute; bottom: 12px; left: 12px; max-width: 320px;
+      font-size: 12px; line-height: 1.4; white-space: pre-wrap;
+      background: rgba(0,0,0,0.7); padding: 10px; border-radius: 8px;
+    }
+    #touch-controls {
+      position: absolute; bottom: 20px; left: 0; right: 0;
+      display: none; justify-content: space-between; padding: 0 20px;
+      pointer-events: none; z-index: 20;
+    }
+    .joystick-zone, .look-zone, .action-btn {
+      pointer-events: auto;
+    }
+    .joystick-zone, .look-zone {
+      width: 120px; height: 120px; border-radius: 50%;
+      background: rgba(255,255,255,0.08); border: 2px solid rgba(255,255,255,0.2);
+      position: relative;
+    }
+    .stick {
+      width: 48px; height: 48px; border-radius: 50%;
+      background: rgba(255,255,255,0.35); position: absolute;
+      top: 50%; left: 50%; transform: translate(-50%,-50%);
+    }
+    .action-btn {
+      width: 64px; height: 64px; border-radius: 50%;
+      background: rgba(0,150,255,0.4); border: 2px solid #09f;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: bold; margin-bottom: 12px;
+    }
+    @media (pointer: coarse) {
+      #touch-controls { display: flex; }
+    }
+  </style>
+</head>
+<body>
+  <div id="canvas-container"></div>
+
+  <div id="ui">
+    <button id="btn-export">Export ChatML</button>
+    <button id="btn-reset">Reset Session</button>
+    <span id="status">Stage 1 – Classical only</span>
+  </div>
+
+  <div id="state-panel">Loading...</div>
+
+  <div id="touch-controls">
+    <div class="joystick-zone" id="move-zone"><div class="stick" id="move-stick"></div></div>
+    <div style="display:flex;flex-direction:column;align-items:center;">
+      <div class="action-btn" id="btn-interact">E</div>
+      <div class="action-btn" id="btn-jump">Jump</div>
+    </div>
+    <div class="look-zone" id="look-zone"><div class="stick" id="look-stick"></div></div>
+  </div>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+      "@pixiv/three-vrm": "https://unpkg.com/@pixiv/three-vrm@2.0.0/lib/three-vrm.module.js"
+    }
+  }
+  </script>
+
+  <script type="module" src="./js/main.js"></script>
+</body>
+</html>
